@@ -1,0 +1,56 @@
+.calendar {
+  padding: 10px;
+  &__text {
+    width: 240px;
+    height: 30px;
+    border: solid 1px #ccc;
+    box-sizing: border-box;
+    outline: none;
+  }
+  &__content {
+    width: 240px;
+    margin-top: 5px;
+    padding: 10px;
+    font-size: 14px;
+    border: solid 1px #ccc;
+    box-sizing: border-box;
+    &__toolbar {
+      display: flex;
+      justify-content: space-between;
+      &__icon {
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        border: solid 1px #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    }
+    &__weeks {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      &__text {
+        width: calc(100% / 7);
+        text-align: center;
+        display: inline-block;
+      }
+    }
+    &__days {
+      display: flex;
+      flex-wrap: wrap;
+      &__text {
+        width: calc(100% / 7);
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        display: inline-block;
+        cursor: pointer;
+        &:hover {
+          background-color: #f0f0f0;
+        }
+      }
+    }
+  }
+}
