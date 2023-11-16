@@ -1,4 +1,5 @@
 .calendar {
+  width: 240px;
   padding: 10px;
   &__text {
     width: 240px;
@@ -13,7 +14,10 @@
     padding: 10px;
     font-size: 14px;
     border: solid 1px #ccc;
+    background-color: #fff;
     box-sizing: border-box;
+    position: fixed;
+    z-index: 1;
     &__toolbar {
       display: flex;
       justify-content: space-between;
@@ -49,6 +53,10 @@
         cursor: pointer;
         &:hover {
           background-color: #f0f0f0;
+        }
+        &.disabled {
+          color: #ccc;
+          cursor: not-allowed;
         }
       }
     }

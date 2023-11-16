@@ -1,57 +1,184 @@
+import { useEffect, useState } from "react";
 import "./Calendar.scss";
 
+type DateItem = { date: number; enable: boolean };
+
 const Calendar: React.FC = () => {
+  /* eslint-disable */
+  const [visible, setVisible] = useState<boolean>(false);
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+  const [selectDate, setSelectDate] = useState<string>("");
+  const [dates, setDates] = useState<Array<DateItem>>();
+  const [dayCount] = useState<any>(
+    new Map([
+      [1, 31],
+      [2, year % 4 === 0 ? 29 : 28],
+      [3, 31],
+      [4, 30],
+      [5, 31],
+      [6, 30],
+      [7, 31],
+      [8, 31],
+      [9, 30],
+      [10, 31],
+      [11, 30],
+      [12, 31],
+    ])
+  );
+
+  /**
+   * 点击日历以外的部分，隐藏日历
+   */
+  const handleDisappear = () => {
+    window.addEventListener("click", (event: MouseEvent) => {
+      const className = (event.target as HTMLElement)?.className;
+      !className.includes("calendar") && setVisible(false);
+    });
+  };
+
+  /**
+   * 切换上个月
+   */
+  const handlePrevMonth = () => {
+    let tempMonth = month - 1;
+    if (tempMonth < 1) {
+      tempMonth = 12;
+      setYear(year - 1);
+    }
+    setMonth(tempMonth);
+    renderDays();
+  };
+
+  /**
+   * 切换下个月
+   */
+  const handleNextMonth = () => {
+    let tempMonth = month + 1;
+    if (tempMonth > 12) {
+      tempMonth = 1;
+      setYear(year + 1);
+    }
+    setMonth(tempMonth);
+    renderDays();
+  };
+
+  /**
+   * 渲染日历
+   */
+  const renderDays = () => {
+    const monthStr = month < 10 ? `0${month}` : month;
+    const firstDate = new Date(`${year}-${monthStr}-01`);
+    const firstDay = firstDate.getDay() === 0 ? 7 : firstDate.getDay();
+    let prevDates: DateItem[] = [];
+    let curDates: DateItem[] = [];
+    let nextDates: DateItem[] = [];
+    // 渲染上个月
+    for (let i = 0; i < firstDay - 1; i++) {
+      prevDates.unshift({
+        date: dayCount.get(month - 1 === 0 ? 12 : month - 1) - i,
+        enable: false,
+      });
+    }
+    // 渲染当月
+    for (let i = 1; i <= dayCount.get(month); i++) {
+      curDates.push({
+        date: i,
+        enable: true,
+      });
+    }
+    // 渲染下个月
+    for (let i = 1; i <= 42 - dayCount.get(month) - firstDay + 1; i++) {
+      nextDates.push({
+        date: i,
+        enable: false,
+      });
+    }
+    setDates([...prevDates, ...curDates, ...nextDates]);
+  };
+
+  /**
+   * 选中日期
+   * @param date
+   */
+  const handleSelectDate = (date: number) => {
+    const tempDateStr = `${year}-${month < 10 ? `0${month}` : month}-${
+      date < 10 ? `0${date}` : date
+    }`;
+    setSelectDate(String(tempDateStr));
+  };
+
+  useEffect(() => {
+    handleDisappear();
+    renderDays();
+  }, [month, year]);
+
   return (
     <div className="calendar">
-      <input type="text" className="calendar__text" />
-      <div className="calendar__content">
-        <div className="calendar__content__toolbar">
-          <div className="calendar__content__toolbar__icon"> &lt; </div>
-          <div className="calendar__content__toolbar__current">2023-11-16</div>
-          <div className="calendar__content__toolbar__icon"> &gt; </div>
+      <input
+        type="text"
+        className="calendar__text"
+        value={selectDate}
+        onChange={(e) => setSelectDate(e.target.value)}
+        onFocus={() => setVisible(true)}
+      />
+      {visible && (
+        <div className="calendar__content">
+          <div className="calendar__content__toolbar">
+            <div
+              className="calendar__content__toolbar__icon"
+              onClick={handlePrevMonth}
+            >
+              &lt;
+            </div>
+            <div className="calendar__content__toolbar__current">
+              {year} 年 {month} 月
+            </div>
+            <div
+              className="calendar__content__toolbar__icon"
+              onClick={handleNextMonth}
+            >
+              &gt;
+            </div>
+          </div>
+          <div className="calendar__content__weeks">
+            <span className="calendar__content__weeks__text">一</span>
+            <span className="calendar__content__weeks__text">二</span>
+            <span className="calendar__content__weeks__text">三</span>
+            <span className="calendar__content__weeks__text">四</span>
+            <span className="calendar__content__weeks__text">五</span>
+            <span className="calendar__content__weeks__text">六</span>
+            <span className="calendar__content__weeks__text">日</span>
+          </div>
+          <div className="calendar__content__days">
+            {dates?.map((dateItem: DateItem, index: number) => {
+              if (dateItem.enable) {
+                return (
+                  <span
+                    className="calendar__content__days__text"
+                    key={index}
+                    onClick={() => {
+                      handleSelectDate(dateItem.date);
+                      setVisible(false);
+                    }}
+                  >
+                    {dateItem.date}
+                  </span>
+                );
+              } else {
+                return (
+                  <span
+                    className="calendar__content__days__text disabled"
+                    key={index}
+                  >
+                    {dateItem.date}
+                  </span>
+                );
+              }
+            })}
+          </div>
         </div>
-        <div className="calendar__content__weeks">
-          <span className="calendar__content__weeks__text">一</span>
-          <span className="calendar__content__weeks__text">二</span>
-          <span className="calendar__content__weeks__text">三</span>
-          <span className="calendar__content__weeks__text">四</span>
-          <span className="calendar__content__weeks__text">五</span>
-          <span className="calendar__content__weeks__text">六</span>
-          <span className="calendar__content__weeks__text">日</span>
-        </div>
-        <div className="calendar__content__days">
-          <span className="calendar__content__days__text">1</span>
-          <span className="calendar__content__days__text">2</span>
-          <span className="calendar__content__days__text">3</span>
-          <span className="calendar__content__days__text">4</span>
-          <span className="calendar__content__days__text">5</span>
-          <span className="calendar__content__days__text">6</span>
-          <span className="calendar__content__days__text">7</span>
-          <span className="calendar__content__days__text">8</span>
-          <span className="calendar__content__days__text">9</span>
-          <span className="calendar__content__days__text">10</span>
-          <span className="calendar__content__days__text">11</span>
-          <span className="calendar__content__days__text">12</span>
-          <span className="calendar__content__days__text">13</span>
-          <span className="calendar__content__days__text">14</span>
-          <span className="calendar__content__days__text">15</span>
-          <span className="calendar__content__days__text">16</span>
-          <span className="calendar__content__days__text">17</span>
-          <span className="calendar__content__days__text">18</span>
-          <span className="calendar__content__days__text">19</span>
-          <span className="calendar__content__days__text">20</span>
-          <span className="calendar__content__days__text">21</span>
-          <span className="calendar__content__days__text">22</span>
-          <span className="calendar__content__days__text">23</span>
-          <span className="calendar__content__days__text">24</span>
-          <span className="calendar__content__days__text">25</span>
-          <span className="calendar__content__days__text">26</span>
-          <span className="calendar__content__days__text">27</span>
-          <span className="calendar__content__days__text">28</span>
-          <span className="calendar__content__days__text">29</span>
-          <span className="calendar__content__days__text">30</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
