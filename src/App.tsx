@@ -14,16 +14,19 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
+    <div style={{ display: "flex", alignItems: "center" }}>
       <Calendar
         ref={calendarRef}
         value={dateValue}
         onChange={handleDateChange}
       />
-      <button onClick={handleClick} style={{ marginLeft: "10px" }}>
+      <button
+        onClick={handleClick}
+        style={{ height: "30px", marginLeft: "10px" }}
+      >
         获取选中日期
       </button>
-    </>
+    </div>
   );
 };
 
