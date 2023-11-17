@@ -1,16 +1,33 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import "./Calendar.scss";
 
+// 定义日期数据格式
 type DateItem = { date: number; enable: boolean };
 
-const Calendar: React.FC = () => {
+// 定义日历组件属性
+type CalendarProps = {
+  ref: React.Ref<any>;
+  value: string;
+  onChange: (date: string) => void;
+};
+
+const Calendar: React.FC<CalendarProps> = forwardRef((props, parentRef) => {
   /* eslint-disable */
   const [visible, setVisible] = useState<boolean>(false);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectDate, setSelectDate] = useState<string>("");
   const [dates, setDates] = useState<Array<DateItem>>();
-  const [dayCount] = useState<any>(
+  const [weeks] = useState<Array<string>>([
+    "一",
+    "二",
+    "三",
+    "四",
+    "五",
+    "六",
+    "日",
+  ]);
+  const [dayCount] = useState<Map<number, number>>(
     new Map([
       [1, 31],
       [2, year % 4 === 0 ? 29 : 28],
@@ -64,6 +81,22 @@ const Calendar: React.FC = () => {
   };
 
   /**
+   * 切换上一年
+   */
+  const handlePrevYear = () => {
+    setYear(year - 1);
+    renderDays();
+  };
+
+  /**
+   * 切换下一年
+   */
+  const handleNextYear = () => {
+    setYear(year + 1);
+    renderDays();
+  };
+
+  /**
    * 渲染日历
    */
   const renderDays = () => {
@@ -76,19 +109,19 @@ const Calendar: React.FC = () => {
     // 渲染上个月
     for (let i = 0; i < firstDay - 1; i++) {
       prevDates.unshift({
-        date: dayCount.get(month - 1 === 0 ? 12 : month - 1) - i,
+        date: dayCount.get(month - 1 === 0 ? 12 : month - 1)! - i,
         enable: false,
       });
     }
     // 渲染当月
-    for (let i = 1; i <= dayCount.get(month); i++) {
+    for (let i = 1; i <= dayCount.get(month)!; i++) {
       curDates.push({
         date: i,
         enable: true,
       });
     }
     // 渲染下个月
-    for (let i = 1; i <= 42 - dayCount.get(month) - firstDay + 1; i++) {
+    for (let i = 1; i <= 42 - dayCount.get(month)! - firstDay + 1; i++) {
       nextDates.push({
         date: i,
         enable: false,
@@ -106,7 +139,16 @@ const Calendar: React.FC = () => {
       date < 10 ? `0${date}` : date
     }`;
     setSelectDate(String(tempDateStr));
+    // 向父组件传递选中日期
+    props.onChange(String(tempDateStr));
   };
+
+  /**
+   * 向父组件暴露属性/方法
+   */
+  useImperativeHandle(parentRef, () => ({
+    selectDate,
+  }));
 
   useEffect(() => {
     handleDisappear();
@@ -125,30 +167,46 @@ const Calendar: React.FC = () => {
       {visible && (
         <div className="calendar__content">
           <div className="calendar__content__toolbar">
-            <div
-              className="calendar__content__toolbar__icon"
-              onClick={handlePrevMonth}
-            >
-              &lt;
+            <div className="calendar__content__toolbar__iconBox">
+              <div
+                className="calendar__content__toolbar__iconBox__icon year"
+                onClick={handlePrevYear}
+              >
+                &lt;&lt;
+              </div>
+              <div
+                className="calendar__content__toolbar__iconBox__icon month"
+                onClick={handlePrevMonth}
+              >
+                &lt;
+              </div>
             </div>
             <div className="calendar__content__toolbar__current">
               {year} 年 {month} 月
             </div>
-            <div
-              className="calendar__content__toolbar__icon"
-              onClick={handleNextMonth}
-            >
-              &gt;
+            <div className="calendar__content__toolbar__iconBox">
+              <div
+                className="calendar__content__toolbar__iconBox__icon month"
+                onClick={handleNextMonth}
+              >
+                &gt;
+              </div>
+              <div
+                className="calendar__content__toolbar__iconBox__icon year"
+                onClick={handleNextYear}
+              >
+                &gt;&gt;
+              </div>
             </div>
           </div>
           <div className="calendar__content__weeks">
-            <span className="calendar__content__weeks__text">一</span>
-            <span className="calendar__content__weeks__text">二</span>
-            <span className="calendar__content__weeks__text">三</span>
-            <span className="calendar__content__weeks__text">四</span>
-            <span className="calendar__content__weeks__text">五</span>
-            <span className="calendar__content__weeks__text">六</span>
-            <span className="calendar__content__weeks__text">日</span>
+            {weeks.map((week: string, index: number) => {
+              return (
+                <span className="calendar__content__weeks__text" key={index}>
+                  {week}
+                </span>
+              );
+            })}
           </div>
           <div className="calendar__content__days">
             {dates?.map((dateItem: DateItem, index: number) => {
@@ -181,6 +239,6 @@ const Calendar: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default Calendar;

@@ -21,14 +21,17 @@
     &__toolbar {
       display: flex;
       justify-content: space-between;
-      &__icon {
-        width: 20px;
-        height: 20px;
-        line-height: 20px;
-        text-align: center;
-        border: solid 1px #ccc;
-        border-radius: 4px;
-        cursor: pointer;
+      &__iconBox {
+        display: flex;
+        &__icon {
+          cursor: pointer;
+          &.year {
+            letter-spacing: -4px;
+          }
+          &.month {
+            margin: 0 10px;
+          }
+        }
       }
     }
     &__weeks {
