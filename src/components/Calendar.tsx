@@ -30,7 +30,7 @@ const Calendar: React.FC<CalendarProps> = forwardRef((props, parentRef) => {
   const [dayCount] = useState<Map<number, number>>(
     new Map([
       [1, 31],
-      [2, year % 4 === 0 ? 29 : 28],
+      [2, 28],
       [3, 31],
       [4, 30],
       [5, 31],
@@ -52,6 +52,13 @@ const Calendar: React.FC<CalendarProps> = forwardRef((props, parentRef) => {
       const className = (event.target as HTMLElement)?.className;
       !className.includes("calendar") && setVisible(false);
     });
+  };
+
+  /**
+   * 设置二月份天数
+   */
+  const setFebruaryDayCount = () => {
+    dayCount.set(2, year % 4 === 0 ? 29 : 28);
   };
 
   /**
@@ -152,6 +159,7 @@ const Calendar: React.FC<CalendarProps> = forwardRef((props, parentRef) => {
 
   useEffect(() => {
     handleDisappear();
+    setFebruaryDayCount();
     renderDays();
   }, [month, year]);
 
